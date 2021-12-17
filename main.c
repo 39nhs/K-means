@@ -10,11 +10,12 @@ int * Euclidean_distance(int** p, int* q, int row, int col);
 double Euclidean_distance_sum(int** p, int* q);
 //더 작은 거리 값을 리턴하는 함수
 //p는 distance
-int** Return(int** p, int row, int col);
+int** retrocede(int** p, int row, int col);
 //배열에서 제일 작은 값을 리턴해주는 함수
 int* minimum(int** p, int row, int col);
 
 int main() {
+
     int data_num;
     int dimension;
     int k;
@@ -35,6 +36,8 @@ int main() {
     int **itr_set;
     int **distance;
     int **compare;
+    int * cluster;
+
     //set 동적할당
     set = (int **) malloc(sizeof(int) * data_num);
     for (int i = 0; i < data_num; i++) {
@@ -46,6 +49,7 @@ int main() {
             fscanf(fp, "%d", &set[i][j]);
         }
     }
+
     //set의 원소값 출력
     for (int i = 0; i < data_num; i++) {
         for (int j = 0; j < dimension; j++) {
@@ -90,17 +94,30 @@ int main() {
     //compare 비교해서 군집화 시켜서 저장시키는 배열.
     //즉, compare[0]에는 itr_1 compare[1]에는 itr_2 compare[2]에는 ...
     //compare 동적할당
+    /*
     compare = (int **) malloc(sizeof(int) * k);
     for (int i = 0; i < k; i++) {
         compare[i] = (int *) malloc(sizeof(int *) * data_num);
     }
-    compare = Return(distance, k, data_num);
+    compare = retrocede(distance, k, data_num);
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < data_num; j++) {
             printf("%d ", compare[i][j]);
         }
         printf("\n");
+    }*/
+
+    /* cluster 동적할당
+     */
+    cluster = (int *) malloc(sizeof(int) * data_num);
+    cluster = minimum(distance, k, data_num);
+    for (int i = 0; i < data_num; i++) {
+        cluster[i] += 1;
+        printf("%d ", cluster[i]);
     }
+
+    FILE * output_file = fopen("../Output.txt", "w");
+    fprintf(output_file, "%d", 1);
 
     return 0;
 
@@ -114,7 +131,7 @@ int * Euclidean_distance(int** p, int* q, int row, int col)
     for (int i = 0; i < row; i++){//p의 사이즈만큼 반복 3번 = data_num
         for (int j = 0; j < col; j++) {//2번 = dimension
             square += pow(p[i][j] - q[j], 2);
-            distance = round(sqrt(square));
+            distance = square;
         }
         square = 0;
         compare[i] = distance;
@@ -139,7 +156,8 @@ double Euclidean_distance_sum(int** p, int* q)
 
 //min에서 인덱스 값을 받아서 restore에 저장후 반환 하는 함수
 //일단 만들어 놓은 것이니 더 좋은 방법이 있다면 그걸로 대체
-int** Return(int** p, int row, int col)
+/*
+int** retrocede(int** p, int row, int col)
 {
     int** restore;
     int* m;
@@ -156,7 +174,7 @@ int** Return(int** p, int row, int col)
         restore[m[i]][i] = m[i];
     }
     return restore;
-}
+}*/
 
 //비교해서 최소값의 인덱스를 포인터에 저장해서 반환해줌
 //예를들어 [4 , 7, 8]
@@ -181,6 +199,8 @@ int* minimum(int** p, int row, int col)
             if (m[k] < m[index]) index = k;
         }
         index_set[i] = index;
+        index = 0;
+        printf("\n");
     }
     return index_set;
 }
