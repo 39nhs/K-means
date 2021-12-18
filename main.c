@@ -7,12 +7,11 @@
 //p에는 Input 텍스트 파일의 좌표, q에는 k의 좌표가 저장되어있다.
 int* Euclidean_distance(int** p, int* q, int row, int col);
 //k좌표와 set 좌표 사이의 유클리드 거리의 전체 합을 구하는 함수.
-int** Euclidean_distance_sum(int** p, int** q, int** r,int k, int d, int n);
-//더 작은 거리 값을 리턴하는 함수
-//p는 distance
-int** retrocede(int** p, int row, int col);
+int** Euclidean_distance_sum(int* p, int** q, int** r,int k, int d, int n);
 //배열에서 제일 작은 값을 리턴해주는 함수
 int* minimum(int** p, int row, int col);
+//k의 좌표가 변했는지 확인하는 함수
+int k_compare(int** p, int** q, int k, int d);
 
 int main() {
 
@@ -27,21 +26,17 @@ int main() {
     FILE *fp = fopen(route, "rt");
     fscanf(fp, "%d %d %d", &k, &dimension, &data_num);
 
-    printf("%d \n", k);
-    printf("%d \n", dimension);
-    printf("%d \n", data_num);
-
-    //배열 안에 데이터의 좌표들을 저장
+    int **before_k;
+    int count = 2;
     int **set;
     int **itr_set;
     int **distance;
-    int **compare;
-    int **cluster;
+    int *compare;
 
     //set 동적할당
     set = (int **) malloc(sizeof(int) * data_num);
     for (int i = 0; i < data_num; i++) {
-        set[i] = (int *) malloc(sizeof(int *) * dimension);
+        set[i] = (int *) malloc(sizeof(int *) * dimension + 1);
     }
     // 파일에 적힌 데이터들을 set에 저장
     for (int i = 0; i < data_num; i++) {
@@ -49,24 +44,26 @@ int main() {
             fscanf(fp, "%d", &set[i][j]);
         }
     }
-    //set의 원소값 출력
-    for (int i = 0; i < data_num; i++) {
-        for (int j = 0; j < dimension; j++) {
-            printf("%d ", set[i][j]);
-        }
-        printf("\n");
-    }
 
     // itr_set 동적할당
     itr_set = (int **) malloc(sizeof(int) * k);
     for (int i = 0; i < k; i++) {
         itr_set[i] = (int *) malloc(sizeof(int *) * dimension);
     }
-    // k의 좌표를 랜덤하게 생성하여 itr_set에 저장
+    // k의 좌표를 데이터 오브젝트 중에 랜덤하게 지정하여 itr_set에 저장
     srand(time(NULL));
+    int n  = rand() % (data_num - 1) + 1;
     for (int i = 0; i < k; i++) {
-        for (int j = 0; j < dimension; j++) {
-            itr_set[i][j] = rand() % 9 + 1;
+        int m = rand() % (data_num - 1) + 1;
+        if (i == 0) {
+            itr_set[i] = set[n];
+        }
+        else {
+            if (n != m) {
+                itr_set[i] = set[m];
+            }
+            else
+                i--;
         }
     }
     //itr_set의 원소값 출력
@@ -85,49 +82,53 @@ int main() {
     for (int i = 0; i < k; i++) {
         distance[i] = Euclidean_distance(set, itr_set[i], data_num, dimension);
     }
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < data_num; j++) {
-            printf("%d ", distance[i][j]);
-        }
-        printf("\n");
-    }
-    //compare 비교해서 군집화 시켜서 저장시키는 배열.
-    //즉, compare[0]에는 itr_1 compare[1]에는 itr_2 compare[2]에는 ...
+
     //compare 동적할당
-    compare = (int **) malloc(sizeof(int) * k);
-    for (int i = 0; i < k; i++) {
-        compare[i] = (int *) malloc(sizeof(int *) * data_num);
-    }
-    compare = retrocede(distance, k, data_num);
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < data_num; j++) {
-            printf("%d ", compare[i][j]);
-        }
-        printf("\n");
-    }
+    compare = minimum(distance, k, data_num);
 
     FILE * output_file = fopen("../Output.txt", "w");
     fprintf(output_file, "%d", 1);
     fprintf(output_file, "\n");
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < data_num; j++) {
-            if (compare[i][j] >= 0) {
+            if (compare[j] == i) {
                 fprintf(output_file, "%d ", j + 1);
             }
         }
         fprintf(output_file, "\n");
     }
-    /* k값을 갱신하고 k값의 변화가 없다면 반복을 종료한다.
-     * 우선 k값을 갱신하기 위해 군집화 시킨 좌표들을 따로 저장해두자. */
-    /* cluster 동적 할당
-     * cluster 에는 각 번호에 해당하는 좌표 값들을 저장.
-     * cluster[0]에는 cluster1에 모인 좌표들 cluster[1]에는 cluster2에 모인 좌표들... */
-    cluster = (int **) malloc(sizeof(int) * k);
-    for (int i = 0; i < k; i++) {
-        cluster[i] = (int *) malloc(sizeof(int) * data_num);
+    for (int i = 0; i < data_num; i++) {
+        set[i][dimension] = compare[i];
     }
     itr_set = Euclidean_distance_sum(compare, set, itr_set, k, dimension, data_num);
 
+    while (1) {
+        before_k = itr_set;
+        for (int i = 0; i < k; i++) {
+            distance[i] = Euclidean_distance(set, itr_set[i], data_num, dimension);
+        }
+
+        compare = minimum(distance, k, data_num);
+        fprintf(output_file, "%d", count);
+        fprintf(output_file, "\n");
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < data_num; j++) {
+                if (compare[j] == i) {
+                    fprintf(output_file, "%d ", j + 1);
+                }
+            }
+            fprintf(output_file, "\n");
+        }
+        for (int i = 0; i < data_num; i++) {
+            set[i][dimension] = compare[i];
+        }
+        count += 1;
+        itr_set = Euclidean_distance_sum(compare, set, itr_set, k, dimension, data_num);
+        if (k_compare(before_k, itr_set, k, dimension) == 2)
+            break;
+        else if (k_compare(before_k, itr_set, k, dimension) == 1)
+            continue;
+    }
 
     return 0;
 
@@ -156,45 +157,42 @@ int * Euclidean_distance(int** p, int* q, int row, int col)
  * 만약 바뀐 k의 좌표가 원래 값과 같다면 return 0을 통해 프로그램을 종료한다.
  * 다르다면 업데이트 된 itr_set을 리턴한다. */
 // p = compare q = set r = itr_set
-int** Euclidean_distance_sum(int** p, int** q, int** r, int k, int d, int n)
+int** Euclidean_distance_sum(int* p, int** q, int** r, int k, int d, int n)
 {
-    int row = 0;
-    int set_sum = 0;
     int count = 0;
+    int c = 0;
+    int e = 0;
     /* 전의 k좌표들을 before_k에 저장해두었다가 k업데이트 후 비교하여 같으면 return 0를 통해 프로그램을 종료시킨다.
      * k의 좌표가 하나라도 다르다면 다시 프로그램을 계속 진행시킨다. */
-    int ** before_k = r;
-    int ** stay;
-    /* stay 동적할당
-     * stay는 좌표를 열 단위로 읽어서 저장해놓은 배열 */
-    stay = (int **) malloc(sizeof (int) * n);
-    for (int i = 0; i < n; i ++) {
-        stay[i] = (int *) malloc(sizeof (int*) * d);
+    int ** temp;
+    //temp 동적할당
+    temp = (int **) malloc(sizeof (int) * n);
+    for (int i = 0; i < d; i++) {
+        temp[i] = (int *) malloc(sizeof (int *) * d + 1);
     }
-
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < n; j++) {
-            if (p[i][j] >= 0) {
-                stay[row] = q[j];
-                row += 1;
+            if (q[j][d] == i) {
+                temp[e] = q[j];
+                e += 1;
             }
         }
-        for (int a = 0; a < d; a++) {
-            for (int b = 0; b < n; b++) {
-                printf("%d \n", stay[b][a]);
-                if (stay[b][a] >= 0) {
-                    set_sum += stay[b][a];
+    }
+    e = 0;
+    for (int i = 0; i < k; i++) {
+        for (int g = 0; g < d; g++) {
+            for (int j = 0; j < n; j++) {
+                if (temp[j][d] == i) {
+                    c += temp[j][g];
+                    e += 1;
                     count += 1;
-                    printf("%d \n", set_sum);
                 }
             }
-            set_sum = set_sum / count;
-            r[i][a] = set_sum;
-            set_sum = 0;
+            c = c / count;
+            r[i][g] = c;
             count = 0;
+            c = 0;
         }
-        set_sum = 0;
-        row = 0;
     }
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < d; j++) {
@@ -206,27 +204,7 @@ int** Euclidean_distance_sum(int** p, int** q, int** r, int k, int d, int n)
     return r;
 }
 
-//min에서 인덱스 값을 받아서 restore에 저장후 반환 하는 함수
-//일단 만들어 놓은 것이니 더 좋은 방법이 있다면 그걸로 대체
 
-int** retrocede(int** p, int row, int col)
-{
-    int** restore;
-    int* m;
-    //m 동적할당
-    m = (int *) malloc(sizeof(int) * col);
-    m = minimum(p, row, col);
-    //retore 동적할당
-    restore = (int **) malloc(sizeof(int) * row);
-    for (int i = 0; i < row; i++) {
-        restore[i] = (int *) malloc(sizeof(int *) * col);
-    }
-
-    for (int i = 0; i < col; i++) {
-        restore[m[i]][i] = m[i];
-    }
-    return restore;
-}
 
 //비교해서 최소값의 인덱스를 포인터에 저장해서 반환해줌
 //예를들어 [4 , 7, 8]
@@ -245,14 +223,29 @@ int* minimum(int** p, int row, int col)
     for (int i = 0; i < col; i++) {
         for (int j = 0; j < row; j++) {
             m[j] = p[j][i];
-            printf("%d ", m[j]);
         }
         for (int k = 1; k < row; k++) {
             if (m[k] < m[index]) index = k;
         }
         index_set[i] = index;
         index = 0;
-        printf("\n");
     }
     return index_set;
+}
+//p는 전의 k좌표들 q는 새로 바뀐 q의 좌표들
+int k_compare(int** p, int** q, int k, int d)
+{
+    int count = 0;
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < d; j++) {
+            if (p[i][j] == q[i][j])
+                count += 1;
+        }
+    }
+    printf("%d", count);
+    if (count == k * d) {
+        return 2;
+    }
+    else
+        return 1;
 }
