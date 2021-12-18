@@ -3,14 +3,13 @@
 #include <time.h>
 #include <string.h>
 #include <math.h>
-//두 좌표사이의 유클리드 거리를 구해주는 함수
-//p에는 Input 텍스트 파일의 좌표, q에는 k의 좌표가 저장되어있다.
+
 int* Euclidean_distance(int** p, int* q, int row, int col);
-//k좌표와 set 좌표 사이의 유클리드 거리의 전체 합을 구하는 함수.
+
 int** Euclidean_distance_sum(int* p, int** q, int** r,int k, int d, int n);
-//배열에서 제일 작은 값을 리턴해주는 함수
+
 int* minimum(int** p, int row, int col);
-//k의 좌표가 변했는지 확인하는 함수
+
 int k_compare(int** p, int** q, int k, int d);
 
 int main() {
@@ -142,14 +141,14 @@ int main() {
     return 0;
 
 }
-//k 좌표와 set 좌표 사이의 유클리드 거리를 구해주는 함수
+
 int * Euclidean_distance(int** p, int* q, int row, int col)
 {
     int square = 0;
     int distance;
     int * compare = (int *) malloc(sizeof(int) * row);
-    for (int i = 0; i < row; i++){//p의 사이즈만큼 반복 3번 = data_num
-        for (int j = 0; j < col; j++) {//2번 = dimension
+    for (int i = 0; i < row; i++){
+        for (int j = 0; j < col; j++) {
             square += pow(p[i][j] - q[j], 2);
             distance = square;
         }
@@ -160,12 +159,7 @@ int * Euclidean_distance(int** p, int* q, int row, int col)
     return compare;
 }
 
-/* K의 좌표 갱신을 위한 함수.
- * 군집화 된 좌표들 사이에서 k값을 갱신하여 좌표가 담긴 포인터를 리턴한다.
- * 그 후 itr_set에 저장되어 있는 k의 좌표를 업데이트 하여 작업을 반복한다.
- * 만약 바뀐 k의 좌표가 원래 값과 같다면 return 0을 통해 프로그램을 종료한다.
- * 다르다면 업데이트 된 itr_set을 리턴한다. */
-// p = compare q = set r = itr_set
+
 int** Euclidean_distance_sum(int* p, int** q, int** r, int k, int d, int n)
 {
     int count = 0;
@@ -214,12 +208,6 @@ int** Euclidean_distance_sum(int* p, int** q, int** r, int k, int d, int n)
 }
 
 
-
-//비교해서 최소값의 인덱스를 포인터에 저장해서 반환해줌
-//예를들어 [4 , 7, 8]
-//        [6, 4, 9]
-//일때 열끼리 비교해서 더 작은 값의 인덱스를 반환.
-//[0, 1, 0]
 int* minimum(int** p, int row, int col)
 {
     int* m;
@@ -241,7 +229,7 @@ int* minimum(int** p, int row, int col)
     }
     return index_set;
 }
-//p는 전의 k좌표들 q는 새로 바뀐 q의 좌표들
+
 int k_compare(int** p, int** q, int k, int d)
 {
     int count = 0;
