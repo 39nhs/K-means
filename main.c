@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 #include <math.h>
 
 int* Euclidean_distance(int** p, int* q, int row, int col);
