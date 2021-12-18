@@ -100,10 +100,19 @@ int main() {
     for (int i = 0; i < data_num; i++) {
         set[i][dimension] = compare[i];
     }
-    itr_set = Euclidean_distance_sum(compare, set, itr_set, k, dimension, data_num);
+    //원래 k 좌표들을 저장해두는 배열
+    before_k = (int **) malloc(sizeof(int) * k);
+    for (int i = 0; i < k; i++) {
+        before_k[i] = (int *) malloc(sizeof(int *) * dimension);
+    }
 
+    itr_set = Euclidean_distance_sum(compare, set, itr_set, k, dimension, data_num);
     while (1) {
-        before_k = itr_set;
+        for (int i = 0; i < k; i ++) {
+            for (int j = 0; j < dimension; j++) {
+                before_k[i][j] = itr_set[i][j];
+            }
+        }
         for (int i = 0; i < k; i++) {
             distance[i] = Euclidean_distance(set, itr_set[i], data_num, dimension);
         }
@@ -136,7 +145,7 @@ int main() {
 //k 좌표와 set 좌표 사이의 유클리드 거리를 구해주는 함수
 int * Euclidean_distance(int** p, int* q, int row, int col)
 {
-    double square = 0;
+    int square = 0;
     int distance;
     int * compare = (int *) malloc(sizeof(int) * row);
     for (int i = 0; i < row; i++){//p의 사이즈만큼 반복 3번 = data_num
@@ -242,7 +251,6 @@ int k_compare(int** p, int** q, int k, int d)
                 count += 1;
         }
     }
-    printf("%d", count);
     if (count == k * d) {
         return 2;
     }
