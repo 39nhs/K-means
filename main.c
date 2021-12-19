@@ -85,6 +85,7 @@ int main() {
     //compare 동적할당
     compare = minimum(distance, k, data_num);
 
+    //현재 디렉터리의 상위 디렉터리에 Output 파일 생성.
     FILE * output_file = fopen("../Output.txt", "w");
     fprintf(output_file, "%d", 1);
     fprintf(output_file, "\n");
