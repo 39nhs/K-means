@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -49,7 +50,7 @@ int main() {
         itr_set[i] = (int *) malloc(sizeof(int *) * dimension);
     }
     // k의 좌표를 데이터 오브젝트 중에 랜덤하게 지정하여 itr_set에 저장
-    srand(time(NULL));
+    srand((unsigned int) time(NULL));
     int n  = rand() % (data_num - 1) + 1;
     for (int i = 0; i < k; i++) {
         int m = rand() % (data_num - 1) + 1;
@@ -144,15 +145,13 @@ int main() {
 int * Euclidean_distance(int** p, int* q, int row, int col)
 {
     int square = 0;
-    int distance;
     int * compare = (int *) malloc(sizeof(int) * row);
     for (int i = 0; i < row; i++){
         for (int j = 0; j < col; j++) {
-            square += pow(p[i][j] - q[j], 2);
-            distance = square;
+            square += (int) pow(p[i][j] - q[j], 2);
         }
+        compare[i] = square;
         square = 0;
-        compare[i] = distance;
     }
 
     return compare;
